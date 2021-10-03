@@ -25,10 +25,11 @@ export type ChartOptions = {
 export class GraphicsComponent {
 
   //valores2: any = []
-  dias2: any=[]
+ 
+  sortedLabels : any=[]
   //alphas:string[]; 
   semanas: any=[]
-  semanasN: number[];
+  sortedValues: number[];
   period: string | null
   year = new Date().getFullYear() - 1
   lat: string = "-2.1482271";
@@ -45,16 +46,16 @@ export class GraphicsComponent {
   }
 
   showSort(){
-    console.log("SEmanas Sort",this.semanasN)
-    console.log("Dias Sort",this.dias2)
+    console.log("SEmanas Sort",this.sortedValues)
+    console.log("Dias Sort",this.sortedLabels)
     this.chartOptions.series = [
       {
         name: "Irradiance Average",
-        data: this.semanasN
+        data: this.sortedValues
       }
     ]
     this.chartOptions.xaxis = {
-      categories: this.dias2
+      categories: this.sortedLabels
     }
     
   }
@@ -103,6 +104,7 @@ export class GraphicsComponent {
     )
       .then(data => data.json())
       .then(res => {
+        
         let dias: any = []
         res = res.properties.parameter.ALLSKY_SFC_SW_DIRH
         let valores = Object.values(res)        
@@ -140,22 +142,23 @@ export class GraphicsComponent {
         dias[51] = this.getFechas("20201223", "20201231")
         
 
-        //
+        
         let valores2 = Object.assign([], this.semanas);
         let semanasOr = Object.assign([], this.semanas);
-        this.semanasN = this.semanas.map(function (x: string) { 
+        this.sortedValues = this.semanas.map(function (x: string) { 
           return parseFloat(x); 
         });
         
-        this.semanasN.sort(function(a, b) {
+        this.sortedValues.sort(function(a, b) {
           return a - b;
         });       
-        this.semanasN.reverse();
-        this.dias2 = [];
 
-        for(let i of this.semanasN){          
+        this.sortedValues.reverse();
+        this.sortedLabels = [];
+
+        for(let i of this.sortedValues){          
           let pos_max = valores2.indexOf(i);          
-          this.dias2.push(dias[pos_max]);
+          this.sortedLabels.push(dias[pos_max]);
           valores2[pos_max]=-2;
         }
 
@@ -212,10 +215,40 @@ export class GraphicsComponent {
         res = res.properties.parameter.ALLSKY_SFC_SW_DIRH
         this.chartOptions.series = [
           {
-            data: Object.values(res)
+            data: Object.values(res).slice(0,-1)
+            
+            
           }
         ]
-        console.log(res)
+        console.log("https://damp-beach-17296.herokuapp.com/" + "https://power.larc.nasa.gov/api/temporal/monthly/point?start=" + this.year + "&end=" + this.year + "&latitude="+lat+"&longitude="+lon+"&community=ag&parameters=ALLSKY_SFC_SW_DIRH&format=json&header=true&time-standard=lst",
+        )
+
+        this.semanas =  Object.values(res).slice(0,-1);
+        console.log("Datos",res);
+        let vals = Object.assign([],  this.semanas);
+        let meses = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC' ];
+        
+        this.sortedValues = this.semanas.map(function (x: string) { 
+          return parseFloat(x); 
+        });
+        
+        this.sortedValues.sort(function(a, b) {
+          return a - b;
+        });       
+        this.sortedValues.reverse();
+
+        this.sortedLabels = [];
+
+        for(let i of this.sortedValues){          
+          let pos_max = vals.indexOf(i);          
+          if (typeof meses[pos_max]!=undefined){
+            this.sortedLabels.push(meses[pos_max]);            
+          }
+          vals[pos_max]=-2;
+        }
+
+        console.log("Etq:" ,this.sortedLabels);
+        console.log("Vals:" ,this.sortedValues);
       })
   }
 
