@@ -256,9 +256,6 @@ export class GraphicsComponent {
     let añoI = inicio.substr(0, 4)
     let mesI = inicio.substr(4, 2)
     let diaI = inicio.substr(6)
-    let añoF = fin.substr(0, 4)
-    let mesF = fin.substr(4, 2)
-    let diaF = fin.substr(6)
     return añoI + "/" + mesI + "/" + diaI
   }
 
